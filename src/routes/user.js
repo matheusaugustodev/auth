@@ -7,7 +7,7 @@ const router = express.Router()
 router.post('/register', async (req, res) => {
     try {
 
-        const { email, name, password } = req.body
+        const { email, name, password, base64_image } = req.body
 
         if (!email || !name || !password) throw 'Dados insuficientes'
         if (!email.match(/^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,6}$/)) throw 'Email inválido'
@@ -19,7 +19,9 @@ router.post('/register', async (req, res) => {
         if (resultaBuscaPorEmail.rows.length > 0) throw 'Email já cadastrado'
 
         const passwordHash = await bcrypt.hash(password, 10)
-        const resultadoCriacao = await db.query(`INSERT INTO users (email, name, password) VALUES ('${email}', '${name}', '${passwordHash}') RETURNING *`)
+        const base64 = base64_image ? `'${base64_image}'` : null
+
+        const resultadoCriacao = await db.query(`INSERT INTO users (email, name, password, base64_image) VALUES ('${email}', '${name}', '${passwordHash}', ${base64}) RETURNING *`)
         const user = resultadoCriacao && resultadoCriacao.rows && resultadoCriacao.rows.length > 0 ? resultadoCriacao.rows[0] : null
 
         if (!user) throw 'Erro ao criar usuário'
