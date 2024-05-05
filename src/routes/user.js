@@ -1,9 +1,8 @@
 const express = require('express')
 const bcrypt = require('bcryptjs')
+const db = require('../config/db')
 
 const router = express.Router()
-
-const User = require('../models/User')
 
 router.post('/register', async (req, res) => {
     try {
@@ -16,18 +15,13 @@ router.post('/register', async (req, res) => {
         if (name.length < 3) throw 'Nome deve ter pelo menos 3 caracteres'
         if (name.match(/[0-9]/)) throw 'Nome não pode ter números'
 
-        const emailExists = await User.findOne({ email })
-        if (emailExists) throw 'Email já cadastrado'
+        const resultaBuscaPorEmail = await db.query(`SELECT * FROM users WHERE email = ${email}`)
+        if (resultaBuscaPorEmail.rows.length > 0) throw 'Email já cadastrado'
 
-        // senha criptografada
         const passwordHash = await bcrypt.hash(password, 10)
+        const resultadoCriacao = await db.query(`INSERT INTO users (email, name, password) VALUES ('${email}', '${name}', '${passwordHash}') RETURNING *`)
+        const user = resultadoCriacao && resultadoCriacao.rows && resultadoCriacao.rows.length > 0 ? resultadoCriacao.rows[0] : null
 
-        const user = await User.create({
-            email,
-            name,
-            password: passwordHash
-        })
-        
         if (!user) throw 'Erro ao criar usuário'
 
         res.status(201).json({ ok: 'ok', message: 'Usuário criado com sucesso'})        
@@ -45,7 +39,8 @@ router.post('/login', async (req, res) => {
         if (!email.match(/^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,6}$/)) throw 'Informações inválidas'
         if (password.length < 6) throw 'Senha deve ter pelo menos 6 caracteres'
 
-        const user = await User.findOne({ email }).select('+password')
+        const resultaBuscaPorEmail = await db.query(`SELECT * FROM users WHERE email = '${email}'`)
+        const user = resultaBuscaPorEmail && resultaBuscaPorEmail.rows && resultaBuscaPorEmail.rows.length > 0 ? resultaBuscaPorEmail.rows[0] : null
         if (!user) throw 'Informações inválidas'
 
         if (!await bcrypt.compare(password, user.password)) throw 'Informações inválidas'
