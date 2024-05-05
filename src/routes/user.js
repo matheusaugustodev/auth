@@ -45,7 +45,7 @@ router.post('/login', async (req, res) => {
 
         if (!await bcrypt.compare(password, user.password)) throw 'Informações inválidas'
 
-        res.status(200).json({ ok: 'ok', message: 'Usuário logado com sucesso'})
+        res.status(200).json({ ok: 'ok', message: 'Usuário logado com sucesso', user })
     } catch (err) {
         return res.status(400).send({ error: 'Falha na autenticação', message: err })
     }
