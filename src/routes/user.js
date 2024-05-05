@@ -15,7 +15,7 @@ router.post('/register', async (req, res) => {
         if (name.length < 3) throw 'Nome deve ter pelo menos 3 caracteres'
         if (name.match(/[0-9]/)) throw 'Nome não pode ter números'
 
-        const resultaBuscaPorEmail = await db.query(`SELECT * FROM users WHERE email = ${email}`)
+        const resultaBuscaPorEmail = await db.query(`SELECT * FROM users WHERE email = '${email}'`)
         if (resultaBuscaPorEmail.rows.length > 0) throw 'Email já cadastrado'
 
         const passwordHash = await bcrypt.hash(password, 10)
