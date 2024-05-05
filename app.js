@@ -14,7 +14,8 @@ const APP_URL = process.env.URL || `http://localhost:${APP_PORT}`
 
 app.get('/', async (req, res) => {
 
-    const connectionString = process.env.POSTGRES_VERCEL_URI
+    // const connectionString = process.env.POSTGRES_VERCEL_URI
+    const connectionString = process.env.SUPABASE_URI
 
     const pool = new Pool({
         connectionString,
@@ -28,12 +29,11 @@ app.get('/', async (req, res) => {
         }   
     })
   
-    res.json({ message: 'Hello World' })
-    
+    // res.json({ message: 'Hello World' }) 
     // select * from users
     
-    // const { rows: users } = await pool.query('select * from users')
-    // res.json({ users })
+    const { rows: users } = await pool.query('select * from users')
+    res.json({ users })
         
 })
 
