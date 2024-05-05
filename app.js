@@ -1,11 +1,8 @@
 const express = require('express')
 const { config } = require('dotenv')
-const postgres = require('postgres')
 
 config()
 
-const connectionString = process.env.SUPABASE_URI
-const sql = postgres(connectionString)
 
 const app = express()
 app.use(express.json());
@@ -15,7 +12,11 @@ const APP_URL = process.env.URL || `http://localhost:${APP_PORT}`
 
 
 app.get('/', async (req, res) => {
-
+    
+    const connectionString = process.env.SUPABASE_URI
+    const postgres = require('postgres')
+    const sql = postgres(connectionString)
+    
     // select * from users
     const users = await sql`select * from users`
     
